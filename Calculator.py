@@ -9,23 +9,25 @@ import re
 from decimal import Decimal, getcontext
 import subprocess
 import decimal
+import requests
+from dotenv import load_dotenv
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(1.90)
+versionnumber = float(2.1)
+
+load_dotenv()
+check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
 
 def update():
-    #grab release from github tag: {githubversion}
     current_directory = os.getcwd()
     print("Current directory:", current_directory)
 
-    # Construct the batch script path
     batch_script = os.path.join(current_directory, "updater.bat")
     print("Batch script path:", batch_script)
 
-    # Use subprocess with proper quoting for the batch script path
     subprocess.Popen(['start', '', batch_script], shell=True)
     sys.exit()
 
@@ -48,7 +50,8 @@ def asktoupdate(prompt):
 def checkgithub():
     global versionnumber
     global githubversionnumber
-    githubversionnumber = float(1.1)
+    githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
+    githubversionnumber = float(githubversionnumber.json()["name"])
     if githubversionnumber == versionnumber:
         print("Calculator is Up-to-Date, Continuing...")
     if githubversionnumber > versionnumber:
@@ -242,7 +245,13 @@ def simplify_fraction(numerator, denominator):
 
 
 #os.system("cls")
-checkgithub()
+if check_for_updates == 'yes':
+    print("Checking for Updates...")
+    checkgithub()
+elif check_for_updates == 'no':
+    print("Not Checking for Updates.")
+else:
+    print("CHECKFORUPDATES Has an Unexpected Value:", check_for_updates)
 print("Welcome to the Calculator!")
 print(f"==========V {versionnumber} (Python)==========")
 print("PI")
