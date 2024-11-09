@@ -16,7 +16,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(2.1)
+versionnumber = float(2.2)
 
 load_dotenv()
 check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
@@ -179,6 +179,10 @@ def find_hcf(numbers):
 
 
 def evaluate_expression(user_input):
+    user_input = user_input.lower()
+    user_input = user_input.replace("m", "000000")
+    user_input = user_input.replace("b", "000000000")
+    user_input = user_input.replace("t", "000000000000")
     modified_input = re.sub(r"(\d+)\(", r"\1*(", user_input)
     
     try:
