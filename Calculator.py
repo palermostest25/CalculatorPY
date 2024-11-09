@@ -16,7 +16,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(2.2)
+versionnumber = float(2.3)
 
 load_dotenv()
 check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
@@ -442,6 +442,7 @@ while True:
             print("18 = LCM")
             print("19 = HCF")
             print("20 = Gradient of a Linear Function")
+            print("21 = DST Calculator")
             convopt = input("What Option Would You Like [1-17]: ")
             print()
 
@@ -737,14 +738,36 @@ while True:
                 continue
 
             if convopt == "20":
-                    c = float(input("Starting Constant: "))
-                    x = float(input("Rate: "))
-                    m = float(input("Number of Rate: "))
-                    y = (m*x)+c
-                    print(f"The Total of a Linear Function with a Constant of {c}, a Rate of {x} and an Amount of Rate of {m} is {y}")
-                    goback()
-                    continue
-
+                c = float(input("Starting Constant: "))
+                x = float(input("Rate: "))
+                m = float(input("Number of Rate: "))
+                y = (m*x)+c
+                print(f"The Total of a Linear Function with a Constant of {c}, a Rate of {x} and an Amount of Rate of {m} is {y}")
+                goback()
+                continue
+            
+            if convopt == "21":
+                print("1 = Distance")
+                print("2 = Speed")
+                print("3 = Time")
+                dstopt = int(input("Which Would You Like to Find?- "))
+                if dstopt == "1":
+                    speed = float(input("Speed (No Units): "))
+                    dsttime = float(input("Time (No Units): "))
+                    distance = speed * dsttime
+                    print(f"The Distance Travelled After {dsttime} at {speed} is {distance}")
+                if dstopt == "2":
+                    distance = float(input("Distance (No Units): "))
+                    dsttime = float(input("Time (No Units): "))
+                    speed = distance / dsttime
+                    print(f"The Speed Travelled Over {distance} for {dsttime} is {speed}")
+                if dstopt == "3":
+                    distance = float(input("Distance (No Units): "))
+                    speed = float(input("Speed (No Units): "))
+                    dsttime = distance / speed
+                    print(f"The Time Taken to Travel {distance} at {speed} is {dsttime}")
+                goback()
+                continue
             goback()
             continue
             
