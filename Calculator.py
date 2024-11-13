@@ -16,7 +16,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(2.3)
+versionnumber = float(2.5)
 
 load_dotenv()
 check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
@@ -443,6 +443,8 @@ while True:
             print("19 = HCF")
             print("20 = Gradient of a Linear Function")
             print("21 = DST Calculator")
+            print("22 = DMV Calculator")
+            print("23 = y=mx+c Given Graph")
             convopt = input("What Option Would You Like [1-17]: ")
             print()
 
@@ -768,10 +770,41 @@ while True:
                     print(f"The Time Taken to Travel {distance} at {speed} is {dsttime}")
                 goback()
                 continue
+                
+            if convopt == "22":
+                print("1 = Density")
+                print("2 = Mass")
+                print("3 = Volume")
+                dmvopt = int(input("Which Would You Like to Find?- "))
+                if dmvopt == "1":
+                    mass = float(input("Mass (No Units): "))
+                    dmvvolume = float(input("Volume (No Units): "))
+                    density = mass / dmvvolume
+                    print(f"The Density Travelled After {dmvvolume} at {mass} is {density}")
+                if dmvopt == "2":
+                    density = float(input("Density (No Units): "))
+                    dmvvolume = float(input("Volume (No Units): "))
+                    mass = density / dmvvolume
+                    print(f"The Mass Travelled Over {density} for {dmvvolume} is {mass}")
+                if dmvopt == "3":
+                    density = float(input("Density (No Units): "))
+                    mass = float(input("Mass (No Units): "))
+                    dmvvolume = density / mass
+                    print(f"The Volume Taken to Travel {density} at {mass} is {dmvvolume}")
+                goback()
+                continue
+            
+            if convopt == "23":
+                change = float(input("Change on the Y Axis Per x (Can Enter Per Any Number of x and Input That Number Next)- "))
+                perx = float(input("Per Number of x- "))
+                gradient = change / perx
+                intercept = float(input("Y Intercept- "))
+                print(f"Calculation: y={gradient}x+{intercept}")
+                goback()
+                continue
+
             goback()
             continue
-            
-
 
         if sum == "guess":
             lowest = int(input("Between- "))
