@@ -16,17 +16,15 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(2.5)
+versionnumber = float(2.6)
 
 load_dotenv()
 check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
 
 def update():
     current_directory = os.getcwd()
-    print("Current directory:", current_directory)
 
     batch_script = os.path.join(current_directory, "updater.bat")
-    print("Batch script path:", batch_script)
 
     subprocess.Popen(['start', '', batch_script], shell=True)
     sys.exit()
@@ -445,6 +443,7 @@ while True:
             print("21 = DST Calculator")
             print("22 = DMV Calculator")
             print("23 = y=mx+c Given Graph")
+            print("24 = y=mx+c Given 2 Points")
             convopt = input("What Option Would You Like [1-17]: ")
             print()
 
@@ -784,12 +783,12 @@ while True:
                 if dmvopt == "2":
                     density = float(input("Density (No Units): "))
                     dmvvolume = float(input("Volume (No Units): "))
-                    mass = density / dmvvolume
+                    mass = density * dmvvolume
                     print(f"The Mass Travelled Over {density} for {dmvvolume} is {mass}")
                 if dmvopt == "3":
                     density = float(input("Density (No Units): "))
                     mass = float(input("Mass (No Units): "))
-                    dmvvolume = density / mass
+                    dmvvolume = mass / density
                     print(f"The Volume Taken to Travel {density} at {mass} is {dmvvolume}")
                 goback()
                 continue
@@ -800,6 +799,17 @@ while True:
                 gradient = change / perx
                 intercept = float(input("Y Intercept- "))
                 print(f"Calculation: y={gradient}x+{intercept}")
+                goback()
+                continue
+
+            if convopt == "24":
+                x1 = float(input("First X Value (No Units): "))
+                y1 = float(input("First Y Value (No Units): "))
+                x2 = float(input("Second X Value (No Units): "))
+                y2 = float(input("Second Y Value (No Units): "))
+                slope = (y2-y1) / (x2-x1)
+                constant = y1 - (slope * x1)
+                print(f"The y=mx+c Formula for the 2 Points ({x1}, {y1}) and ({x2}, {y2}) is y = {slope}x + {constant}")
                 goback()
                 continue
 
@@ -966,7 +976,7 @@ while True:
             time.sleep(3)
             print("YOU FOOL, YOU HAVE DOOMED US ALL!!!!!!! DEATH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             time.sleep(2)
-            exit()
+            
 
         else:
             result = evaluate_expression(sum)
