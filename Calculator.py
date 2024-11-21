@@ -11,15 +11,32 @@ import subprocess
 import decimal
 import requests
 from dotenv import load_dotenv
+import openai
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(2.6)
+versionnumber = float(3.0)
 
-load_dotenv()
-check_for_updates = os.getenv('CHECKFORUPDATES').strip().lower()  # Strip whitespace and make lowercase
+dotenv_path = '.env'
+load_dotenv(dotenv_path)
+
+api_key = os.getenv("OPENAI_API_KEY")
+
+if api_key is None:
+    print("OPENAI_API_KEY not Found in .env. Setting it to 'undefined'.")
+    api_key = "undefined"
+else:
+    print(f"OPENAI_API_KEY is Set.")
+
+check_for_updates = os.getenv('CHECKFORUPDATES')
+
+if check_for_updates is None:
+    print("CHECKFORUPDATES Not Found in .env. Setting it to 'yes'.")
+    check_for_updates = "yes"
+else:
+    print(f"CHECKFORUPDATES is Set to: {check_for_updates.strip().lower()}")
 
 def update():
     current_directory = os.getcwd()
@@ -285,10 +302,10 @@ while True:
                 print("False")
             goback()
             continue
-        if sum == "cls" or sum == "clear":
+        if sum.lower() == "cls" or sum.lower() == "clear":
             os.system("cls")
             continue
-        if sum == "power":
+        if sum.lower() == "power":
             usersum = input("Enter the Number: ")
             userthepower = input("To the Power of: ")
             usersum = float(usersum)
@@ -297,35 +314,35 @@ while True:
             print(f"{usersum} to the Power of {userthepower} is {result}")
             goback()
             continue
-        if sum == "sqrt":
+        if sum.lower() == "sqrt":
             usersum = input("Enter the Number: ")
             usersum = float(usersum)
             result = math.sqrt(usersum)
             print(f"The Square Root of {usersum} is {result}")
             goback()
             continue
-        if sum == "square":
+        if sum.lower() == "square":
             usersum = input("Enter the Number to be Squared: ")
             usersum = float(usersum)
             result = (usersum*usersum)
             print(f"The Square of {usersum} is {result}")
             goback()
             continue
-        if sum == "round":
+        if sum.lower() == "round":
             usersum = input("Enter the Number to be Rounded: ")
             userto = int(input("Enter the amount of Decimal Places to Round to: "))
             result = round(float(usersum), userto)
             print(f"{usersum} Rounded to {userto} Decimal Places is {result}")
             goback()
             continue
-        if sum == "abs":
+        if sum.lower() == "abs":
             usersum = input("Enter the Number to Find the Absolute Value of: ")
             usersum = float(usersum)
             result = abs(usersum)
             print(f"The Absolute Value of {usersum} is {result}")
             goback()
             continue
-        if sum == "avg":
+        if sum.lower() == "avg":
             str1 = input('Enter the Following Syntax: "num1, num2, num3, etc": ')
             result = list(str1.split(','))
             total = 0
@@ -336,37 +353,37 @@ while True:
             print(f"The Average of {str1} is {result1}")
             goback()
             continue
-        if sum == "median":
+        if sum.lower() == "median":
             str1 = input('Enter the Following Syntax: "num1, num2, num3, etc": ')
             result = str1.split(', ')
             result1 = median(result)
             print(f"The Median of {str1} is {result1}")
             goback()
             continue
-        if sum == "exit":
+        if sum.lower() == "exit":
             exit()
-        if sum == "mode":
+        if sum.lower() == "mode":
             str1 = input('Enter the Following Syntax: "num1, num2, num3, etc": ')
             result = str1.split(', ')
             result1 = mode(result)
             print(f"The Mode of {str1} is {result1}")
             goback()
             continue
-        if sum == "floor":
+        if sum.lower() == "floor":
             usersum = input("Enter the Number: ")
             usersum = float(usersum)
             result = math.floor(usersum)
             print(f"The Floor of {usersum} is {result}")
             goback()
             continue
-        if sum == "ceiling" or sum == "ceil":
+        if sum.lower() == "ceiling" or sum.lower() == "ceil":
             usersum = input("Enter the Number: ")
             usersum = float(usersum)
             result = math.ceil(usersum)
             print(f"The Ceiling of {usersum} is {result}")
             goback()
             continue
-        if sum == "simp":
+        if sum.lower() == "simp":
             print("1 = Simplify Fractions")
             print("2 = Simplify Ratios")
             simpopt = input("Which Option Would You Like? [1, 2]: ")
@@ -381,7 +398,7 @@ while True:
                 print(f"Simplified Ratio: {simplify_ratio(ratio)}")
             goback()
             continue
-        if sum == "algebra" or sum == "alg" or sum == "alge":
+        if sum.lower() == "algebra" or sum.lower() == "alg" or sum.lower() == "alge":
             print("1 = Linear Equation Solver")
             print("2 = Expression Simplifier")
             print("3 = General Algebra")
@@ -419,7 +436,7 @@ while True:
                     print(f"The Result of {algebrasum} is {algebraicresult} Where {variable_assignments}")
             goback()
             continue
-        if sum == "conv" or sum == "convert" or sum == "converter":
+        if sum.lower() == "conv" or sum.lower() == "convert" or sum.lower() == "converter":
             print("1 = Miles to KM")
             print("2 = Pounds to KG")
             print("3 = Celsius to Fahrenheit")
@@ -816,7 +833,7 @@ while True:
             goback()
             continue
 
-        if sum == "guess":
+        if sum.lower() == "guess":
             lowest = int(input("Between- "))
             highest = int(input("And- "))
             randomnumber = random.randint(lowest, highest)
@@ -844,7 +861,7 @@ while True:
                 break
             continue
 
-        if sum == "pi":
+        if sum.lower() == "pi":
             decimals = int(input("How Many Decimals Would You Like in Your Number? [1-x]: "))
             accuracy = input("How Accurate Would You Like Your Number? [1-x] (x for Infinity): ")
             getcontext().prec = decimals
@@ -875,7 +892,8 @@ while True:
                     print(f"Final: {pi}, Accuracy: {accuracy}")
             goback()
             continue
-        if sum == "e":
+
+        if sum.lower() == "e":
             decimals = int(input("Decimals- "))
             getcontext().prec = decimals
             e = Decimal(0)
@@ -892,7 +910,7 @@ while True:
             goback()
             continue
             
-        if sum == "prime":
+        if sum.lower() == "prime":
             primes = prime_nums_generator()
             n = int(input("Input the Number of Prime Numbers You Want to Generate- "))
 
@@ -901,7 +919,28 @@ while True:
                 print(next(primes))
             goback()
             continue
-        if sum == "?":
+
+        if sum.lower() == "chatgpt" or sum.lower() == "gpt":
+            messages = [ {"role": "system", "content": "You are a intelligent maths assistant."} ]
+            while True:
+                try:
+                    message = input("User : ")
+                    if message:
+                        messages.append(
+                            {"role": "user", "content": message},
+                        )
+                        chat = openai.ChatCompletion.create(
+                            model="gpt-4o", messages=messages
+                        )
+                    reply = chat.choices[0].message.content
+                    print(f"ChatGPT: {reply}")
+                    messages.append({"role": "assistant", "content": reply})
+                except KeyboardInterrupt:
+                    break
+            goback()
+            continue
+
+        if sum.lower() == "?":
             os.system("cls")
             print(f"==========V {versionnumber} (Python)==========")
             print("PI")
@@ -927,7 +966,7 @@ while True:
             goback()
             continue
 
-        if sum == "f" or sum == "fibonacci":
+        if sum.lower() == "f" or sum.lower() == "fibonacci":
             fib = [0,1]
             count = 0
             sys.set_int_max_str_digits(2147483647)
@@ -962,21 +1001,23 @@ while True:
             time.sleep(1)
             print("1")
             time.sleep(1)
-            print("Creating Wormhole to the Future.")
+            print("Creating Wormhole to the Future...")
             time.sleep(1)
-            print("Reality Engine Shutting Down.")
+            print("Reality Engine Shutting Down...")
             time.sleep(1)
             print("Inverting Matter...")
             time.sleep(1)
-            print("Creating Synthetic Universe.")
+            print("Creating Synthetic Universe...")
             time.sleep(1)
-            print("Untangling String Theory")
+            print("Untangling String Theory...")
             time.sleep(2)
-            print("\n\n\n\n\n\n\n\nContacting the Ghost of Stephen Hawking.")
+            print("\n\n\n\n\n\n\n\nContacting the Ghost of Stephen Hawking...")
             time.sleep(3)
             print("YOU FOOL, YOU HAVE DOOMED US ALL!!!!!!! DEATH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             time.sleep(2)
-            
+            os.system(f'python "{os.getcwd()}\\dino.py"')
+            goback()
+            continue
 
         else:
             result = evaluate_expression(sum)
