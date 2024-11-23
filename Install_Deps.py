@@ -40,7 +40,7 @@ def main(file_path):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: Python Install_Requirements.py <python_file>")
-	input("Press Enter to Exit...")
+        input("Press Enter to Exit...")
         sys.exit(1)
 
     file_path = sys.argv[1]
