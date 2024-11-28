@@ -11,13 +11,13 @@ import subprocess
 import decimal
 import requests
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.0)
+versionnumber = float(3.4)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -29,6 +29,10 @@ if api_key is None:
     api_key = "undefined"
 else:
     print(f"OPENAI_API_KEY is Set.")
+    try:
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    except:
+        print("API Key is Not Working")
 
 check_for_updates = os.getenv('CHECKFORUPDATES')
 
@@ -37,6 +41,69 @@ if check_for_updates is None:
     check_for_updates = "yes"
 else:
     print(f"CHECKFORUPDATES is Set to: {check_for_updates.strip().lower()}")
+
+
+def help():
+    print("Welcome to the Calculator!")
+    print(f"==========V {versionnumber} (Python)==========")
+    print("PI")
+    print("E")
+    print("POW")
+    print("SQRT")
+    print("Square")
+    print("Round")
+    print("ABS")
+    print("AVG")
+    print("Algebra")
+    print("Conv for Conversions")
+    print("Guess for Guessing Game")
+    print("Sum for Solve Sum Game")
+    print("TF for True or False Game")
+    print("Simp for Simplification")
+    print("Prime for Prime Number Generator")
+    print("F for Fibonacci Calculator")
+
+
+def parse_ymxc(equation):
+    match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
+    
+    if match:
+        m = float(match.group(1)) if match.group(1) else 1.0
+        c = float(match.group(2).replace(" ", "")) if match.group(2) else 0.0
+        
+        return m, c
+    else:
+        raise ValueError("The Equation is Not in the Expected Format: y = mx + c")
+
+def calculate_ymxc_y(m, c, x):
+    return m * x + c
+
+def calculate_ymxc_x(y, m, c):
+    return (y - c) / m
+
+
+def chatbot():
+    messages = [
+        {"role": "system", "content": "You are a Helpful Maths Assistant."},
+    ]
+    while True:
+        user_input = input("User: ")
+
+        if user_input.lower() == "quit":
+            break
+
+        messages.append({"role": "user", "content": user_input})
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages
+            )
+
+            assistant_reply = response.choices[0].message.content
+            print(f"Bot: {assistant_reply}")
+            messages.append({"role": "assistant", "content": assistant_reply})
+        except Exception as e:
+            print(f"An Error Occurred: {e}")
 
 def update():
     current_directory = os.getcwd()
@@ -263,7 +330,7 @@ def simplify_fraction(numerator, denominator):
         return str(top) + "/" + str(bottom)
 
 
-#os.system("cls")
+os.system("cls")
 if check_for_updates == 'yes':
     print("Checking for Updates...")
     checkgithub()
@@ -271,22 +338,8 @@ elif check_for_updates == 'no':
     print("Not Checking for Updates.")
 else:
     print("CHECKFORUPDATES Has an Unexpected Value:", check_for_updates)
-print("Welcome to the Calculator!")
-print(f"==========V {versionnumber} (Python)==========")
-print("PI")
-print("E")
-print("POW")
-print("SQRT")
-print("Square")
-print("Round")
-print("ABS")
-print("AVG")
-print("Algebra")
-print("Conv for Conversions")
-print("Guess for Guessing Game")
-print("Simp for Simplification")
-print("Prime for Prime Number Generator")
-print("F for Fibonacci Calculator")
+
+help()
 while True:
     try:
         sum = input("Please Enter Your Sum(Type ? for Information)- ")
@@ -461,7 +514,8 @@ while True:
             print("22 = DMV Calculator")
             print("23 = y=mx+c Given Graph")
             print("24 = y=mx+c Given 2 Points")
-            convopt = input("What Option Would You Like [1-17]: ")
+            print("25 = x, y Points for y=mx+c Graph")
+            convopt = input("What Option Would You Like [1-24]: ")
             print()
 
             if convopt == "1":
@@ -830,6 +884,26 @@ while True:
                 goback()
                 continue
 
+            if convopt == "25":
+                equation = input("Enter the Equation in the Form 'y = mx + c' (e.g., y = 10x + 2): ")
+                try:
+                    m, c = parse_ymxc(equation)
+                    xycalc = input("Which Would You Like to Calculate? [x, y]: ")
+                    if xycalc.lower() == "x":
+                        y = float(input("Enter the Value of y: "))
+                        x = calculate_ymxc_x(y, m, c)
+                        print(f"The Value for x for y = {y} is: {x}")
+                    if xycalc.lower() == "y":
+                        x = float(input("Enter the Value of x: "))
+                        y = calculate_ymxc_y(m, c, x)
+                        print(f"The Value of y for x = {x} is: {y}")
+
+                except ValueError as e:
+                    print(f"Error: {e}")
+
+                goback()
+                continue
+
             goback()
             continue
 
@@ -859,6 +933,474 @@ while True:
                     continue
                 goback()
                 break
+            continue
+
+            
+        if sum.lower() == "sum":
+            choice = input("1 = Addition\n2 = Subtraction\n3 = Multiplication\n4 = Division\n5 = All\nWhat Type of Operations Would You Like?: ")
+            level = input("What Level Would You Like? [1, 2, 3]: ")
+            rounds = int(input("How Many Rounds Would You Like to Play?: "))
+            score = 0
+            besttime = 100
+
+            if choice == "1": #addition
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                    answer = round(float(eval(f"{sum1} + {sum2}")), 1)
+                    print(f"What is the Answer to {sum1} + {sum2}?")
+                    while True:
+                        try:
+                            useranswer = float(input(">>> "))
+                            break
+                        except TypeError:
+                            pass
+                    end = time.time()
+                    timetaken = round(end-start, 2)
+                    if timetaken < besttime:
+                        besttime = timetaken
+                    if useranswer == answer:
+                        score += 1
+                        print(f"Correct! Score: {score} Time Taken: {round(end-start, 2)}s\n")
+                    if useranswer != answer:
+                        print(f"Incorrect! Score: {score}")
+                        print(f"Answer: {answer}, You Put: {useranswer} Time Taken: {round(end-start, 2)}s\n")
+                    count += 1
+
+            if choice == "2": #subtraction
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                    answer = round(float(eval(f"{sum1} - {sum2}")), 1)
+                    print(f"What is the Answer to {sum1} - {sum2}?")
+                    while True:
+                        try:
+                            useranswer = float(input(">>> "))
+                            break
+                        except TypeError:
+                            pass
+                    end = time.time()
+                    timetaken = round(end-start, 2)
+                    if timetaken < besttime:
+                        besttime = timetaken
+                    if useranswer == answer:
+                        score += 1
+                        print(f"Correct! Score: {score} Time Taken: {round(end-start, 2)}s\n")
+                    if useranswer != answer:
+                        print(f"Incorrect! Score: {score}")
+                        print(f"Answer: {answer}, You Put: {useranswer} Time Taken: {round(end-start, 2)}s\n")
+                    count += 1
+
+            if choice == "3": #multiplication
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                    answer = round(float(eval(f"{sum1} * {sum2}")), 1)
+                    print(f"What is the Answer to {sum1} * {sum2}?")
+                    while True:
+                        try:
+                            useranswer = float(input(">>> "))
+                            break
+                        except TypeError:
+                            pass
+                    end = time.time()
+                    timetaken = round(end-start, 2)
+                    if timetaken < besttime:
+                        besttime = timetaken
+                    if useranswer == answer:
+                        score += 1
+                        print(f"Correct! Score: {score} Time Taken: {round(end-start, 2)}s\n")
+                    if useranswer != answer:
+                        print(f"Incorrect! Score: {score}")
+                        print(f"Answer: {answer}, You Put: {useranswer} Time Taken: {round(end-start, 2)}s\n")
+                    count += 1
+
+            if choice == "4": #division
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                    answer = round(float(eval(f"{sum1} / {sum2}")), 1)
+                    print(f"What is the Answer to {sum1} / {sum2}?")
+                    while True:
+                        try:
+                            useranswer = float(input(">>> "))
+                            break
+                        except TypeError:
+                            pass
+                    end = time.time()
+                    timetaken = round(end-start, 2)
+                    if timetaken < besttime:
+                        besttime = timetaken
+                    if useranswer == answer:
+                        score += 1
+                        print(f"Correct! Score: {score} Time Taken: {round(end-start, 2)}s\n")
+                    if useranswer != answer:
+                        print(f"Incorrect! Score: {score}")
+                        print(f"Answer: {answer}, You Put: {useranswer} Time Taken: {round(end-start, 2)}s\n")
+                    count += 1
+
+            if choice == "5": #all
+                count = 0
+                start = time.time()
+                while count < rounds:
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                    
+                    sign = random.choice(["+", "-", "*", "/"])
+                    answer = round(float(eval(f"{sum1} {sign} {sum2}")), 1)
+                    print(f"What is the Answer to {sum1} {sign} {sum2}?")
+                    while True:
+                        try:
+                            useranswer = float(input(">>> "))
+                            break
+                        except TypeError:
+                            pass
+                    end = time.time()
+                    timetaken = round(end-start, 2)
+                    if timetaken < besttime:
+                        besttime = timetaken
+                    if useranswer == answer:
+                        score += 1
+                        print(f"Correct! Score: {score} Time Taken: {round(end-start, 2)}s\n")
+                    if useranswer != answer:
+                        print(f"Incorrect! Score: {score}")
+                        print(f"Answer: {answer}, You Put: {useranswer} Time Taken: {round(end-start, 2)}s\n")
+                    count += 1
+            goback()
+            continue
+
+        if sum.lower() == "tf":
+            while True:
+                try:
+                    choice = input("1 = Addition\n2 = Subtraction\n3 = Multiplication\n4 = Division\n5 = All\nWhat Type of Operations Would You Like?: ")
+                    level = input("What Level Would You Like? [1, 2, 3]: ")
+                    rounds = int(input("How Many Rounds Would You Like to Play?: "))
+                    break
+                except:
+                    print("\nEnter a Valid Input\n")
+                    pass
+
+            print("When Answering,\n1 = True\n2 = False")
+
+            if choice == "1": #addition
+                score = 0
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    changeornot = random.randint(0, 1)
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                        answer = eval(f"{sum1} + {sum2}")
+                        difference = random.randint(-50, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                        answer = eval(f"{sum1} + {sum2}")
+                        difference = random.randint(-100, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                        answer = eval(f"{sum1} + {sum2}")
+                        difference = round(random.uniform(1.0, 100.0), 1)
+
+                    if changeornot == 0:
+                        print(f"Does {sum1} + {sum2} = {answer}? [1, 2]- ")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+
+                    if changeornot == 1:
+                        print(f"Does {sum1} + {sum2} = {answer + difference}? [1, 2]-")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                    count += 1
+
+            if choice == "2": #subtraction
+                score = 0
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    changeornot = random.randint(0, 1)
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                        answer = eval(f"{sum1} - {sum2}")
+                        difference = random.randint(-50, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                        answer = eval(f"{sum1} - {sum2}")
+                        difference = random.randint(-100, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                        answer = eval(f"{sum1} - {sum2}")
+                        difference = round(random.uniform(1.0, 100.0), 1)
+
+                    if changeornot == 0:
+                        print(f"Does {sum1} - {sum2} = {answer}? [1, 2]- ")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+
+                    if changeornot == 1:
+                        print(f"Does {sum1} - {sum2} = {answer + difference}? [1, 2]-")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                    count += 1
+
+            if choice == "3": #multiplication
+                score = 0
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    changeornot = random.randint(0, 1)
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                        answer = eval(f"{sum1} * {sum2}")
+                        difference = random.randint(-50, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                        answer = eval(f"{sum1} * {sum2}")
+                        difference = random.randint(-100, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                        answer = eval(f"{sum1} * {sum2}")
+                        difference = round(random.uniform(1.0, 100.0), 1)
+
+                    if changeornot == 0:
+                        print(f"Does {sum1} * {sum2} = {answer}? [1, 2]- ")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+
+                    if changeornot == 1:
+                        print(f"Does {sum1} * {sum2} = {answer + difference}? [1, 2]-")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                    count += 1
+
+            if choice == "4": #division
+                score = 0
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    changeornot = random.randint(0, 1)
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                        answer = eval(f"{sum1} / {sum2}")
+                        difference = random.randint(-50, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                        answer = eval(f"{sum1} / {sum2}")
+                        difference = random.randint(-100, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                        answer = eval(f"{sum1} / {sum2}")
+                        difference = round(random.uniform(1.0, 100.0), 1)
+
+                    if changeornot == 0:
+                        print(f"Does {sum1} / {sum2} = {answer}? [1, 2]- ")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+
+                    if changeornot == 1:
+                        print(f"Does {sum1} / {sum2} = {answer + difference}? [1, 2]-")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                    count += 1
+
+            if choice == "5": #all
+                score = 0
+                count = 0
+                while count < rounds:
+                    start = time.time()
+                    changeornot = random.randint(0, 1)
+                    sign = random.choice(["+", "-", "*", "/"])
+                    if level == "1":
+                        sum1 = random.randint(1, 50)
+                        sum2 = random.randint(1, 50)
+                        answer = round(float(eval(f"{sum1} {sign} {sum2}")), 1)
+                        difference = random.randint(-50, 50)
+                    if level == "2":
+                        sum1 = random.randint(1, 100)
+                        sum2 = random.randint(1, 100)
+                        answer = round(float(eval(f"{sum1} {sign} {sum2}")), 1)
+                        difference = random.randint(-100, 100)
+                    if level == "3":
+                        sum1 = round(random.uniform(1.0, 100.0), 1)
+                        sum2 = round(random.uniform(1.0, 100.0), 1)
+                        answer = round(float(eval(f"{sum1} {sign} {sum2}")), 1)
+                        difference = round(random.uniform(1.0, 100.0), 1)
+
+                    if changeornot == 0:
+                        print(f"Does {sum1} {sign} {sum2} = {answer}? [1, 2]- ")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+
+                    if changeornot == 1:
+                        print(f"Does {sum1} {sign} {sum2} = {answer + difference}? [1, 2]-")
+                        while True:
+                            try:
+                                useranswer = float(input(">>> "))
+                                break
+                            except:
+                                pass
+                        end = time.time()
+                        timetaken = round((end - start), 1)
+                        if useranswer == "1":
+                            print(f"Wrong! Score: {score} Time: {timetaken}")
+                        if useranswer == "2":
+                            score += 1
+                            print(f"Correct! Score: {score} Time: {timetaken}")
+                    count += 1
+            goback()
             continue
 
         if sum.lower() == "pi":
@@ -921,39 +1463,17 @@ while True:
             continue
 
         if sum.lower() == "chatgpt" or sum.lower() == "gpt":
-            messages = [ {"role": "system", "content": "You are a intelligent maths assistant."} ]
-            while True:
-                try:
-                    message = input("User : ")
-                    if message:
-                        messages.append(
-                            {"role": "user", "content": message},
-                        )
-                        chat = openai.ChatCompletion.create(
-                            model="gpt-4o", messages=messages
-                        )
-                    reply = chat.choices[0].message.content
-                    print(f"ChatGPT: {reply}")
-                    messages.append({"role": "assistant", "content": reply})
-                except KeyboardInterrupt:
-                    break
+            print("Start Chatting with the Bot (Type 'quit' to Stop)!")
+            chatbot()
             goback()
             continue
 
-        if sum.lower() == "?":
+        if sum.lower() == "?" or sum.lower() == "help":
             os.system("cls")
-            print(f"==========V {versionnumber} (Python)==========")
-            print("PI")
-            print("E")
-            print("POW")
-            print("SQRT")
-            print("Square")
-            print("Round")
-            print("ABS")
-            print("AVG")
-            print("Conv for Conversions")
-            print("Guess for the Guessing Game")
-            print("Simp for Simplify Fractions")
+            help()
+            goback()
+            continue
+
         if "!" in sum:
             sum = sum[:-1]
             sum = int(sum)
@@ -1032,4 +1552,4 @@ while True:
         print("Error")
         goback()
         continue
-    goback()
+        goback()
