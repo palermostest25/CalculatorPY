@@ -1557,6 +1557,8 @@ while True:
                 i += 2
             total_dB = 10 * math.log10(total_intensity)
             print(f"The Resulting Decibel Level After Performing {input_values} is Approximately {total_dB:.2f} dB")
+            goback()
+            continue
 
         if sum.endswith("/0"):
             input("Are You Sure You Want to Do This? Press Enter to Continue...")
