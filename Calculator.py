@@ -17,7 +17,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.4)
+versionnumber = float(3.5)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -62,7 +62,6 @@ def help():
     print("Simp for Simplification")
     print("Prime for Prime Number Generator")
     print("F for Fibonacci Calculator")
-
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -132,27 +131,31 @@ def asktoupdate(prompt):
 def checkgithub():
     global versionnumber
     global githubversionnumber
-    githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
-    githubversionnumber = float(githubversionnumber.json()["name"])
-    if githubversionnumber == versionnumber:
-        print("Calculator is Up-to-Date, Continuing...")
-    if githubversionnumber > versionnumber:
-        asktoupdate("1")
-    if githubversionnumber < versionnumber:
-        print("Local Version is Higher Than Github Version...")
-        print("1: Continue")
-        print("2: Grab Latest Release from Github")
-        while True:
-            biglocalversion = input("What Would You Like to Do? [1, 2]: ")
-            if biglocalversion == "1":
-                print("Continuing...")
-                break
-            if biglocalversion == "2":
-                asktoupdate("2")
-                break
-            else:
-                print("Enter a Valid Response...")
-                pass
+    try:
+        githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
+        githubversionnumber = float(githubversionnumber.json()["name"])
+        if githubversionnumber == versionnumber:
+            print("Calculator is Up-to-Date, Continuing...")
+        if githubversionnumber > versionnumber:
+            asktoupdate("1")
+        if githubversionnumber < versionnumber:
+            print("Local Version is Higher Than Github Version...")
+            print("1: Continue")
+            print("2: Grab Latest Release from Github")
+            while True:
+                biglocalversion = input("What Would You Like to Do? [1, 2]: ")
+                if biglocalversion == "1":
+                    print("Continuing...")
+                    break
+                if biglocalversion == "2":
+                    asktoupdate("2")
+                    break
+                else:
+                    print("Enter a Valid Response...")
+                    pass
+    except:
+        print("Unable to Connect to Github...")
+        print("Continuing...")
 
 def fibonacciall():
     fib = [0, 1]
@@ -908,31 +911,62 @@ while True:
             continue
 
         if sum.lower() == "guess":
-            lowest = int(input("Between- "))
-            highest = int(input("And- "))
-            randomnumber = random.randint(lowest, highest)
-            guessamnt = 0
-            while True:
-                guess = input("Guess the Number: ")
-                guess = int(guess)
-                guessamnt += 1
-                if guess == randomnumber:
-                    print("Great Job!")
-                    print(f"You Guessed It In {guessamnt} Tries!")
-                if guess > highest:
-                    print("Guess is Outside Range!")
-                    continue
-                if guess < lowest:
-                    print("Guess is Outside Range!")
-                    continue
-                if guess > randomnumber:
-                    print("Lower!")
-                    continue
-                if guess < randomnumber:
-                    print("Higher!")
-                    continue
-                goback()
-                break
+            print("1 = I Guess")
+            print("2 = You Guess")
+            meoryou = input("Which Game Would You Like? [1, 2]- ")
+            if meoryou == "1":
+                print("Pick a Number.")
+                print("I Will Try to Guess It!")
+                guessrange = input("Enter Your Range (eg., 1-100): ")
+                tries = 0
+                try:
+                    start, end = map(int, guessrange.split('-'))
+                    if start > end:
+                        print("Error: The Start Number Must Be Less Than Or Equal to the End Number.")
+                    else:
+                        while True:
+                            guess = random.randint(start, end)
+                            print(f"I Guess {guess} Current Tries: {tries}")
+                            hlc = input("Higher, Lower Or Correct? [1, 2, 3]: ")
+                            if hlc == "3":
+                                print(f"Yay! I Guessed Your Number: {guess} in {tries} Tries")
+                                break
+                            elif hlc == "1":
+                                start = guess + 1
+                            elif hlc == "2":
+                                end = guess - 1
+                            else:
+                                print("Invalid Input! Please Enter 1 (Higher), 2 (Lower), or 3 (Correct).")
+                            tries += 1
+                except ValueError:
+                    print("Error: Please Enter A Valid Range In The Format 'Start-End' (eg., 1-100).")
+            if meoryou == "2":
+                lowest = int(input("Between- "))
+                highest = int(input("And- "))
+                randomnumber = random.randint(lowest, highest)
+                guessamnt = 0
+                while True:
+                    guess = input("Guess the Number: ")
+                    guess = int(guess)
+                    guessamnt += 1
+                    if guess == randomnumber:
+                        print("Great Job!")
+                        print(f"You Guessed It In {guessamnt} Tries!")
+                    if guess > highest:
+                        print("Guess is Outside Range!")
+                        continue
+                    if guess < lowest:
+                        print("Guess is Outside Range!")
+                        continue
+                    if guess > randomnumber:
+                        print("Lower!")
+                        continue
+                    if guess < randomnumber:
+                        print("Higher!")
+                        continue
+                    goback()
+                    break
+            goback()
             continue
 
             
@@ -960,7 +994,7 @@ while True:
                     print(f"What is the Answer to {sum1} + {sum2}?")
                     while True:
                         try:
-                            useranswer = float(input(">>> "))
+                            useranswer = input(">>> ")
                             break
                         except TypeError:
                             pass
@@ -993,7 +1027,7 @@ while True:
                     print(f"What is the Answer to {sum1} - {sum2}?")
                     while True:
                         try:
-                            useranswer = float(input(">>> "))
+                            useranswer = input(">>> ")
                             break
                         except TypeError:
                             pass
@@ -1026,7 +1060,7 @@ while True:
                     print(f"What is the Answer to {sum1} * {sum2}?")
                     while True:
                         try:
-                            useranswer = float(input(">>> "))
+                            useranswer = input(">>> ")
                             break
                         except TypeError:
                             pass
@@ -1059,7 +1093,7 @@ while True:
                     print(f"What is the Answer to {sum1} / {sum2}?")
                     while True:
                         try:
-                            useranswer = float(input(">>> "))
+                            useranswer = input(">>> ")
                             break
                         except TypeError:
                             pass
@@ -1094,7 +1128,7 @@ while True:
                     print(f"What is the Answer to {sum1} {sign} {sum2}?")
                     while True:
                         try:
-                            useranswer = float(input(">>> "))
+                            useranswer = input(">>> ")
                             break
                         except TypeError:
                             pass
@@ -1151,7 +1185,7 @@ while True:
                         print(f"Does {sum1} + {sum2} = {answer}? [1, 2]- ")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1167,7 +1201,7 @@ while True:
                         print(f"Does {sum1} + {sum2} = {answer + difference}? [1, 2]-")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1206,7 +1240,7 @@ while True:
                         print(f"Does {sum1} - {sum2} = {answer}? [1, 2]- ")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1222,7 +1256,7 @@ while True:
                         print(f"Does {sum1} - {sum2} = {answer + difference}? [1, 2]-")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1261,7 +1295,7 @@ while True:
                         print(f"Does {sum1} * {sum2} = {answer}? [1, 2]- ")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1277,7 +1311,7 @@ while True:
                         print(f"Does {sum1} * {sum2} = {answer + difference}? [1, 2]-")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1316,7 +1350,7 @@ while True:
                         print(f"Does {sum1} / {sum2} = {answer}? [1, 2]- ")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1332,7 +1366,7 @@ while True:
                         print(f"Does {sum1} / {sum2} = {answer + difference}? [1, 2]-")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1372,7 +1406,7 @@ while True:
                         print(f"Does {sum1} {sign} {sum2} = {answer}? [1, 2]- ")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
@@ -1388,7 +1422,7 @@ while True:
                         print(f"Does {sum1} {sign} {sum2} = {answer + difference}? [1, 2]-")
                         while True:
                             try:
-                                useranswer = float(input(">>> "))
+                                useranswer = input(">>> ")
                                 break
                             except:
                                 pass
