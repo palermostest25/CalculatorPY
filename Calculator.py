@@ -17,7 +17,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.5)
+versionnumber = float(3.6)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -62,6 +62,7 @@ def help():
     print("Simp for Simplification")
     print("Prime for Prime Number Generator")
     print("F for Fibonacci Calculator")
+    print("D for Decibel Calculator")
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -1539,6 +1540,23 @@ while True:
                 fibonacciall()
             goback()
             continue
+        
+        if sum.lower() == "d" or sum.lower() == "decibel":
+            input_values = input("Enter the Decibel Values and Operations (e.g., 10 + 20 - 5): ").split()
+            total_intensity = 10 ** (float(input_values[0]) / 10)
+            i = 1
+            while i < len(input_values):
+                operator = input_values[i]
+                next_value = float(input_values[i + 1])
+                next_intensity = 10 ** (next_value / 10)
+                
+                if operator == '+':
+                    total_intensity += next_intensity
+                elif operator == '-':
+                    total_intensity -= next_intensity
+                i += 2
+            total_dB = 10 * math.log10(total_intensity)
+            print(f"The Resulting Decibel Level After Performing {input_values} is Approximately {total_dB:.2f} dB")
 
         if sum.endswith("/0"):
             input("Are You Sure You Want to Do This? Press Enter to Continue...")
