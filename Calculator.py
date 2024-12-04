@@ -12,27 +12,31 @@ import decimal
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
+from deep_translator import GoogleTranslator
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.6)
+versionnumber = float(3.7)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
 
-api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-if api_key is None:
+if openai_api_key is None:
     print("OPENAI_API_KEY not Found in .env. Setting it to 'undefined'.")
     api_key = "undefined"
 else:
     print(f"OPENAI_API_KEY is Set.")
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = OpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
     except:
         print("API Key is Not Working")
+
+
+currency_api_key = os.environ.get("CURRENCY_API_KEY")
 
 check_for_updates = os.getenv('CHECKFORUPDATES')
 
@@ -63,6 +67,7 @@ def help():
     print("Prime for Prime Number Generator")
     print("F for Fibonacci Calculator")
     print("D for Decibel Calculator")
+    print("C for Currecy Converter")
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -263,19 +268,6 @@ def find_hcf(numbers):
     
     return result
 
-
-def evaluate_expression(user_input):
-    user_input = user_input.lower()
-    user_input = user_input.replace("m", "000000")
-    user_input = user_input.replace("b", "000000000")
-    user_input = user_input.replace("t", "000000000000")
-    modified_input = re.sub(r"(\d+)\(", r"\1*(", user_input)
-    
-    try:
-        result = eval(modified_input)
-        return result
-    except Exception as e:
-        return f"Error: {e}"
 
 # def clean_units(unit):
     # unit = unit.rstrip('s')  # remove plural
@@ -505,7 +497,7 @@ while True:
             print("9 = Inches to CM")
             print("10 = Tax Calculator")
             print("11 = Add Percentage to a Number")
-            print("12 = Language Translation aka Google Translate")
+            print("12 = Language Translation")
             print("13 = Month Information")
             print("14 = What percentage of a number is in a number")
             print("15 = Celsius to Kelvin")
@@ -683,8 +675,16 @@ while True:
                 print(f"{value} With Added Percentage of {per}% is {result}")
             
             if convopt == "12":
-                webbrowser.open("translate.google.com")
-            
+                fromlang = input("From Language [eg. fr]: ")
+                fromlang = fromlang.lower()
+                tolang = input("To Language [eg. en]: ")
+                tolang = tolang.lower()
+                sentance = input("Input: ")
+                translated = GoogleTranslator(source=fromlang, target=tolang).translate(sentance)
+                print(f"{sentance} Translated from {fromlang} to {tolang} is {translated}")
+                goback()
+                continue
+
             if convopt == "13":
                 print("Month Data: ")
                 print("Number - Month - Short Form - Days")
@@ -1560,6 +1560,30 @@ while True:
             goback()
             continue
 
+        if sum.lower() == "c" or sum.lower() == "currency":
+            url = f'https://api.currencyapi.com/v3/latest?apikey={currency_api_key}'
+
+            response = requests.get(url)
+            data = response.json()
+
+            rates = data['data']
+
+            def convert_currency(amount, from_currency, to_currency, rates):
+                if from_currency != 'USD':
+                    amount = amount / rates[from_currency]['value']
+                return amount * rates[to_currency]['value']
+
+
+            amount = float(input("Enter Amount: "))
+            amount = amount.replace("$", "")
+            from_currency = input("From Currency (e.g., USD): ").upper()
+            to_currency = input("To Currency (e.g., EUR): ").upper()
+
+            converted_amount = convert_currency(amount, from_currency, to_currency, rates)
+            print(f"{amount} {from_currency} = {converted_amount:.2f} {to_currency}")
+            goback()
+            continue
+
         if sum.endswith("/0"):
             input("Are You Sure You Want to Do This? Press Enter to Continue...")
             input("But I am Just Reccomending That You Don't Do This...")
@@ -1594,8 +1618,25 @@ while True:
             continue
 
         else:
-            result = evaluate_expression(sum)
-            print(f"The Answer to {sum} is {result}")
+            try:
+                sum = sum.lower()
+                sum = sum.replace("m", "000000")
+                sum = sum.replace("b", "000000000")
+                sum = sum.replace("t", "000000000000")
+                sum = re.sub(r"(\d+)\(", r"\1*(", sum)
+                
+                try:
+                    result = eval(sum)
+                    print(f"The Answer to {sum} is {result}")
+                except Exception as e:
+                    print("Error")
+                    goback()
+                    continue
+
+            except:
+                print("Error")
+                goback()
+                continue
             goback()
             continue
     except KeyboardInterrupt:
