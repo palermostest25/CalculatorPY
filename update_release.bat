@@ -1,59 +1,68 @@
 @echo off
+
+title Update Calculator Release
+
 setlocal enabledelayedexpansion
 
-:: Ensure .env is ignored
-echo Excluding .env file from Git tracking...
-if not exist .gitignore (
-    echo .env > .gitignore
-) else (
-    findstr /c:".env" .gitignore >nul || echo .env >> .gitignore
+set URL=https://github.com/palermostest25/CalculatorPY/releases/tag/latest
+curl -s "%URL%" | findstr "<title>" > temp.txt
+for /f "tokens=2 delims= " %%A in ('findstr "<title>" temp.txt') do (
+    set "OLD_VERSION=%%A"
 )
+set "OLD_VERSION=%OLD_VERSION:Release =%"
+del temp.txt
 
-git rm --cached .env >nul 2>&1
-git add .gitignore
-git commit -m "Exclude .env from Git tracking" >nul 2>&1
+echo Old Version: %OLD_VERSION%
+set /p "NEW_VERSION=Enter The New Version Tag (eg., 1.1): "
+set /p "RELEASE_NOTES=Enter Release Notes For The New Version: "
+echo Is All This Information Correct?
+pause
 
-:: Prompt for the old version
-set /p OLD_VERSION="Enter the old version tag (e.g., v1.0): "
+git add .
+git reset -- ".env"
 
-:: Prompt for the new version
-set /p NEW_VERSION="Enter the new version tag (e.g., v1.1): "
-
-:: Ensure the working directory is clean
 git status --porcelain >nul
-if not errorlevel 1 (
-    echo Working directory is clean.
+echo Uncommitted Changes Detected. Staging And Committing Them...
+git add . || exit /b 1
+git commit -m "Auto-Commit Before Releasing Version %NEW_VERSION%" || exit /b 1
+git push origin main || exit /b 1
+
+echo Checking If Tag 'latest' Exists...
+git tag -l latest >nul
+if %errorlevel%==0 (
+    echo Creating Tag %OLD_VERSION%
+    git tag -d latest >nul 2>&1
+    git tag -a %OLD_VERSION% -m "Release For Version %OLD_VERSION%"
+    git push origin %OLD_VERSION%
+    git push origin :refs/tags/latest >nul 2>&1
+    echo Renamed 'latest' Tag To %OLD_VERSION%.
 ) else (
-    echo Uncommitted changes detected. Staging and committing them...
-    git add .
-    git commit -m "Auto-commit before releasing version %NEW_VERSION%"
+    echo 'latest' Tag Does Not Exist. Skipping Renaming...
 )
 
-:: Push all changes to the repository
-echo Pushing all changes to the main repository...
-git push origin
-
-:: Create a tag for the old version (specific to Calculator.py)
-git checkout latest -- Calculator.py
-git add Calculator.py
-git commit -m "Tagging old release %OLD_VERSION%"
-git tag -a %OLD_VERSION% -m "Tagging old release %OLD_VERSION%"
-git push origin %OLD_VERSION%
-echo Tagged old release: %OLD_VERSION%
-
-:: Move the "latest" tag to the new version
+echo Creating And Assigning New Tag '%NEW_VERSION%' As 'latest'...
+git tag -a %NEW_VERSION% -m "%RELEASE_NOTES%"
 git tag -f latest
-git tag -d %NEW_VERSION% 2>nul
-git tag -a %NEW_VERSION% -m "New release %NEW_VERSION%"
-git push origin --tags --force
-echo Updated latest tag to %NEW_VERSION%.
+git push origin %NEW_VERSION%
+git push origin latest
+echo Assigned 'latest' Tag To %NEW_VERSION%.
 
-:: Create a GitHub release for the new version
-set /p GITHUB_TOKEN="Enter your GitHub Personal Access Token: "
-curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
-     -H "Accept: application/vnd.github.v3+json" ^
-     https://api.github.com/repos/palermostest25/CalculatorPY/releases ^
-     -d "{\"tag_name\":\"%NEW_VERSION%\",\"name\":\"Release %NEW_VERSION%\",\"body\":\"Release for version %NEW_VERSION%\",\"target_commitish\":\"main\",\"prerelease\":false}"
+echo Creating A GitHub Release For The Old Version...
+gh release edit latest --tag %OLD_VERSION% --draft=false
+if errorlevel 1 (
+    echo Failed To Edit The GitHub Release For %OLD_VERSION%. Please Check Your GitHub CLI Configuration.
+    pause
+    exit /b 1
+)
+echo GitHub Release For %OLD_VERSION% Edited Successfully With Tag %OLD_VERSION%.
 
-echo GitHub release for %NEW_VERSION% created successfully.
+echo Creating A GitHub Release For The New Version...
+gh release create latest --title "%NEW_VERSION%" --notes "%RELEASE_NOTES%" --target main Calculator.py --draft=false
+if errorlevel 1 (
+    echo Failed To Create The GitHub Release For %NEW_VERSION%. Please Check Your GitHub CLI Configuration.
+    pause
+    exit /b 1
+)
+echo GitHub Release For %NEW_VERSION% Created Successfully.
+
 pause
