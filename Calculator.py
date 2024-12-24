@@ -18,7 +18,7 @@ import kanu # type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.7)
+versionnumber = float(3.8)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -511,7 +511,8 @@ while True:
             print("23 = y=mx+c Given Graph")
             print("24 = y=mx+c Given 2 Points")
             print("25 = x, y Points for y=mx+c Graph")
-            convopt = input("What Option Would You Like [1-24]: ")
+            print("26 = Desmos")
+            convopt = input("What Option Would You Like [1-26]: ")
             print()
 
             if convopt == "1":
@@ -907,6 +908,30 @@ while True:
 
                 goback()
                 continue
+
+            if convopt == "26":
+                if convopt == "26":
+                    print("1 = Graphing")
+                    print("2 = Scientific")
+                    print("3 = Four Function")
+                    print("4 = Matrix")
+                    print("5 = Geometry")
+                    print("6 = 3D")
+                    desmosopt = input("Which Option Would You Like? [1-6]- ")
+                    if desmosopt == "1":
+                        webbrowser.open("https://www.desmos.com/calculator")
+                    if desmosopt == "2":
+                        webbrowser.open("https://www.desmos.com/scientific")
+                    if desmosopt == "3":
+                        webbrowser.open("https://www.desmos.com/fourfunction")
+                    if desmosopt == "4":
+                        webbrowser.open("https://www.desmos.com/matrix")
+                    if desmosopt == "5":
+                        webbrowser.open("https://www.desmos.com/geometry")
+                    if desmosopt == "6":
+                        webbrowser.open("https://www.desmos.com/3d")
+                    goback()
+                    continue
 
             goback()
             continue
