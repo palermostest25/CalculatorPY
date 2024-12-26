@@ -13,12 +13,14 @@ import requests
 from dotenv import load_dotenv
 from openai import OpenAI
 from deep_translator import GoogleTranslator
+import matplotlib.pyplot as plt
+import numpy as np
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.9)
+versionnumber = float(3.10)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -68,6 +70,41 @@ def help():
     print("F for Fibonacci Calculator")
     print("D for Decibel Calculator")
     print("C for Currecy Converter")
+
+def plot_linear_equation(equation: str):
+    equation = equation.strip().lower()
+    if not equation.startswith("y="):
+        print("Invalid Format. Please Start With 'Y='.")
+        return
+
+    equation = equation[2:].replace(" ", "")
+    
+    if "x" in equation:
+        parts = equation.split("x")
+        slope = parts[0].strip() if parts[0] else "1"
+        if slope == "-":
+            slope = "-1"
+        c = parts[1].strip() if len(parts) > 1 else "0"
+    else:
+        slope = "0"
+        c = equation
+
+    slope = float(slope) if slope else 1
+    c = float(c)
+
+    x = np.linspace(-10, 10, 100)
+    y = slope * x + c
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(x, y, label=f"Y = {slope}X + {c}")
+    plt.axhline(0, color='black', linewidth=0.8, linestyle="--")
+    plt.axvline(0, color='black', linewidth=0.8, linestyle="--")
+    plt.title("Plot Of Linear Equation")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    plt.legend()
+    plt.show()
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -143,6 +180,7 @@ def checkgithub():
         if githubversionnumber == versionnumber:
             print("Calculator is Up-to-Date, Continuing...")
         if githubversionnumber > versionnumber:
+            print("Github Version Number is Higher Than Local Version")
             asktoupdate("1")
         if githubversionnumber < versionnumber:
             print("Local Version is Higher Than Github Version...")
@@ -512,7 +550,8 @@ while True:
             print("24 = y=mx+c Given 2 Points")
             print("25 = x, y Points for y=mx+c Graph")
             print("26 = Desmos")
-            convopt = input("What Option Would You Like [1-26]: ")
+            print("27 = Plot Linear Equation")
+            convopt = input("What Option Would You Like [1-27]: ")
             print()
 
             if convopt == "1":
@@ -875,6 +914,7 @@ while True:
                 gradient = change / perx
                 intercept = float(input("Y Intercept- "))
                 print(f"Calculation: y={gradient}x+{intercept}")
+                plot_linear_equation(f"y={gradient}x+{intercept}")
                 goback()
                 continue
 
@@ -886,6 +926,7 @@ while True:
                 slope = (y2-y1) / (x2-x1)
                 constant = y1 - (slope * x1)
                 print(f"The y=mx+c Formula for the 2 Points ({x1}, {y1}) and ({x2}, {y2}) is y = {slope}x + {constant}")
+                plot_linear_equation(f"y={slope}x+{constant}")
                 goback()
                 continue
 
@@ -929,6 +970,14 @@ while True:
                     webbrowser.open("https://www.desmos.com/geometry")
                 if desmosopt == "6":
                     webbrowser.open("https://www.desmos.com/3d")
+                goback()
+                continue
+            
+            if convopt == "27":
+                equation = input("Enter A Linear Equation (eg., y = 3x + 2): ")
+
+                plot_linear_equation(f"{equation}")
+
                 goback()
                 continue
 
