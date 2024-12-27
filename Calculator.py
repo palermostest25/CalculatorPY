@@ -15,12 +15,13 @@ from openai import OpenAI
 from deep_translator import GoogleTranslator
 import matplotlib.pyplot as plt
 import numpy as np
+import roman
 import kanu # type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.10)
+versionnumber = round(Decimal(3.11), 2)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -171,10 +172,10 @@ def asktoupdate(prompt):
         print("Updating...")
         update()
 
-def checkgithub():
-    global versionnumber
+def checkgithub(versionnumberfunction):
     global githubversionnumber
     try:
+        versionnumber = float(versionnumberfunction)
         githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
         githubversionnumber = float(githubversionnumber.json()["name"])
         if githubversionnumber == versionnumber:
@@ -367,7 +368,7 @@ def simplify_fraction(numerator, denominator):
 os.system("cls")
 if check_for_updates == 'yes':
     print("Checking for Updates...")
-    checkgithub()
+    checkgithub(versionnumber)
 elif check_for_updates == 'no':
     print("Not Checking for Updates.")
 else:
@@ -551,7 +552,8 @@ while True:
             print("25 = x, y Points for y=mx+c Graph")
             print("26 = Desmos")
             print("27 = Plot Linear Equation")
-            convopt = input("What Option Would You Like [1-27]: ")
+            print("28 = Roman Numeral Converter")
+            convopt = input("What Option Would You Like [1-28]: ")
             print()
 
             if convopt == "1":
@@ -978,6 +980,21 @@ while True:
 
                 plot_linear_equation(f"{equation}")
 
+                goback()
+                continue
+
+            if convopt == "28":
+                print("1 = To Roman")
+                print("2 = From Roman")
+                romanopt = input("Which Option Would You Like? [1, 2]: ")
+                if romanopt == "1":
+                    n = input("Number: ")
+                    r = roman.toRoman(int(n))
+                    print(f"{n} in Roman Numerals is {r}")
+                if romanopt == "2":
+                    r = input("Roman Numeral: ")
+                    n = roman.fromRoman(r)
+                    print(f"{r} in Standard Numerals is {n}")
                 goback()
                 continue
 
