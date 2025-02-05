@@ -4,26 +4,24 @@ import time
 import sys
 import random
 from statistics import *
-import webbrowser
 import re
 from decimal import Decimal, getcontext
 import subprocess
-import decimal
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
+import urllib3
 from deep_translator import GoogleTranslator
-import matplotlib.pyplot as plt
-import numpy as np
-import roman
 import kanu # type: ignore
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = round(Decimal(3.11), 2)
+versionnumber = float(3.8)
 
-dotenv_path = '.env'
+dotenv_path = ".env"
 load_dotenv(dotenv_path)
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -71,41 +69,6 @@ def help():
     print("F for Fibonacci Calculator")
     print("D for Decibel Calculator")
     print("C for Currecy Converter")
-
-def plot_linear_equation(equation: str):
-    equation = equation.strip().lower()
-    if not equation.startswith("y="):
-        print("Invalid Format. Please Start With 'Y='.")
-        return
-
-    equation = equation[2:].replace(" ", "")
-    
-    if "x" in equation:
-        parts = equation.split("x")
-        slope = parts[0].strip() if parts[0] else "1"
-        if slope == "-":
-            slope = "-1"
-        c = parts[1].strip() if len(parts) > 1 else "0"
-    else:
-        slope = "0"
-        c = equation
-
-    slope = float(slope) if slope else 1
-    c = float(c)
-
-    x = np.linspace(-10, 10, 100)
-    y = slope * x + c
-
-    plt.figure(figsize=(8, 6))
-    plt.plot(x, y, label=f"Y = {slope}X + {c}")
-    plt.axhline(0, color='black', linewidth=0.8, linestyle="--")
-    plt.axvline(0, color='black', linewidth=0.8, linestyle="--")
-    plt.title("Plot Of Linear Equation")
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.grid(color='gray', linestyle='--', linewidth=0.5)
-    plt.legend()
-    plt.show()
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -172,16 +135,15 @@ def asktoupdate(prompt):
         print("Updating...")
         update()
 
-def checkgithub(versionnumberfunction):
+def checkgithub():
+    global versionnumber
     global githubversionnumber
     try:
-        versionnumber = float(versionnumberfunction)
         githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
         githubversionnumber = float(githubversionnumber.json()["name"])
         if githubversionnumber == versionnumber:
             print("Calculator is Up-to-Date, Continuing...")
         if githubversionnumber > versionnumber:
-            print("Github Version Number is Higher Than Local Version")
             asktoupdate("1")
         if githubversionnumber < versionnumber:
             print("Local Version is Higher Than Github Version...")
@@ -368,7 +330,7 @@ def simplify_fraction(numerator, denominator):
 os.system("cls")
 if check_for_updates == 'yes':
     print("Checking for Updates...")
-    checkgithub(versionnumber)
+    checkgithub()
 elif check_for_updates == 'no':
     print("Not Checking for Updates.")
 else:
@@ -550,10 +512,7 @@ while True:
             print("23 = y=mx+c Given Graph")
             print("24 = y=mx+c Given 2 Points")
             print("25 = x, y Points for y=mx+c Graph")
-            print("26 = Desmos")
-            print("27 = Plot Linear Equation")
-            print("28 = Roman Numeral Converter")
-            convopt = input("What Option Would You Like [1-28]: ")
+            convopt = input("What Option Would You Like [1-24]: ")
             print()
 
             if convopt == "1":
@@ -916,7 +875,6 @@ while True:
                 gradient = change / perx
                 intercept = float(input("Y Intercept- "))
                 print(f"Calculation: y={gradient}x+{intercept}")
-                plot_linear_equation(f"y={gradient}x+{intercept}")
                 goback()
                 continue
 
@@ -928,7 +886,6 @@ while True:
                 slope = (y2-y1) / (x2-x1)
                 constant = y1 - (slope * x1)
                 print(f"The y=mx+c Formula for the 2 Points ({x1}, {y1}) and ({x2}, {y2}) is y = {slope}x + {constant}")
-                plot_linear_equation(f"y={slope}x+{constant}")
                 goback()
                 continue
 
@@ -949,52 +906,6 @@ while True:
                 except ValueError as e:
                     print(f"Error: {e}")
 
-                goback()
-                continue
-            
-            if convopt == "26":
-                print("1 = Graphing")
-                print("2 = Scientific")
-                print("3 = Four Function")
-                print("4 = Matrix")
-                print("5 = Geometry")
-                print("6 = 3D")
-                desmosopt = input("Which Option Would You Like? [1-6]- ")
-                if desmosopt == "1":
-                    webbrowser.open("https://www.desmos.com/calculator")
-                if desmosopt == "2":
-                    webbrowser.open("https://www.desmos.com/scientific")
-                if desmosopt == "3":
-                    webbrowser.open("https://www.desmos.com/fourfunction")
-                if desmosopt == "4":
-                    webbrowser.open("https://www.desmos.com/matrix")
-                if desmosopt == "5":
-                    webbrowser.open("https://www.desmos.com/geometry")
-                if desmosopt == "6":
-                    webbrowser.open("https://www.desmos.com/3d")
-                goback()
-                continue
-            
-            if convopt == "27":
-                equation = input("Enter A Linear Equation (eg., y = 3x + 2): ")
-
-                plot_linear_equation(f"{equation}")
-
-                goback()
-                continue
-
-            if convopt == "28":
-                print("1 = To Roman")
-                print("2 = From Roman")
-                romanopt = input("Which Option Would You Like? [1, 2]: ")
-                if romanopt == "1":
-                    n = input("Number: ")
-                    r = roman.toRoman(int(n))
-                    print(f"{n} in Roman Numerals is {r}")
-                if romanopt == "2":
-                    r = input("Roman Numeral: ")
-                    n = roman.fromRoman(r)
-                    print(f"{r} in Standard Numerals is {n}")
                 goback()
                 continue
 
@@ -1653,7 +1564,7 @@ while True:
         if sum.lower() == "c" or sum.lower() == "currency":
             url = f'https://api.currencyapi.com/v3/latest?apikey={currency_api_key}'
 
-            response = requests.get(url)
+            response = requests.get(url, verify=False)
             data = response.json()
 
             rates = data['data']
@@ -1664,8 +1575,8 @@ while True:
                 return amount * rates[to_currency]['value']
 
 
-            amount = float(input("Enter Amount: "))
-            amount = amount.replace("$", "")
+            amount = float(input("Enter Amount: $"))
+            #amount = amount.replace("$", "")
             from_currency = input("From Currency (e.g., USD): ").upper()
             to_currency = input("To Currency (e.g., EUR): ").upper()
 
