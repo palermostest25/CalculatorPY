@@ -4,24 +4,28 @@ import time
 import sys
 import random
 from statistics import *
+import webbrowser
 import re
+from sympy import symbols, Eq, solve
 from decimal import Decimal, getcontext
 import subprocess
+import decimal
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
-import urllib3
 from deep_translator import GoogleTranslator
+import matplotlib.pyplot as plt
+import numpy as np
+import roman
 import kanu # type: ignore
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import pi #type: ignore
 
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = float(3.8)
+versionnumber = round(Decimal(3.20), 2)
 
-dotenv_path = ".env"
+dotenv_path = '.env'
 load_dotenv(dotenv_path)
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -69,6 +73,58 @@ def help():
     print("F for Fibonacci Calculator")
     print("D for Decibel Calculator")
     print("C for Currecy Converter")
+    print("P for Pythagoras")
+    print("T for Tan")
+    print("A for Area of Polygons")
+    print("FT for Factor Tree")
+    print("S for Solver")
+
+
+
+def factor_tree(num, level=0):
+    for i in range(2, int(math.sqrt(num)) + 1):
+        if num % i == 0:
+            print("  " * level + str(num))
+            factor_tree(i, level + 1)
+            factor_tree(num // i, level + 1)
+            return
+    print("  " * level + str(num))
+    leaves.append(num)
+
+def plot_linear_equation(equation: str):
+    equation = equation.strip().lower()
+    if not equation.startswith("y="):
+        print("Invalid Format. Please Start With 'Y='.")
+        return
+
+    equation = equation[2:].replace(" ", "")
+    
+    if "x" in equation:
+        parts = equation.split("x")
+        slope = parts[0].strip() if parts[0] else "1"
+        if slope == "-":
+            slope = "-1"
+        c = parts[1].strip() if len(parts) > 1 else "0"
+    else:
+        slope = "0"
+        c = equation
+
+    slope = float(slope) if slope else 1
+    c = float(c)
+
+    x = np.linspace(-10, 10, 100)
+    y = slope * x + c
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(x, y, label=f"Y = {slope}X + {c}")
+    plt.axhline(0, color='black', linewidth=0.8, linestyle="--")
+    plt.axvline(0, color='black', linewidth=0.8, linestyle="--")
+    plt.title("Plot Of Linear Equation")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    plt.legend()
+    plt.show()
 
 def parse_ymxc(equation):
     match = re.match(r"y\s*=\s*([+-]?\d*\.?\d*)\s*x\s*([+-]\s*\d*\.?\d*)", equation.replace(" ", ""))
@@ -135,15 +191,16 @@ def asktoupdate(prompt):
         print("Updating...")
         update()
 
-def checkgithub():
-    global versionnumber
+def checkgithub(versionnumberfunction):
     global githubversionnumber
     try:
+        versionnumber = float(versionnumberfunction)
         githubversionnumber = (requests.get("https://api.github.com/repos/palermostest25/CalculatorPY/releases/latest"))
         githubversionnumber = float(githubversionnumber.json()["name"])
         if githubversionnumber == versionnumber:
             print("Calculator is Up-to-Date, Continuing...")
         if githubversionnumber > versionnumber:
+            print("Github Version Number is Higher Than Local Version")
             asktoupdate("1")
         if githubversionnumber < versionnumber:
             print("Local Version is Higher Than Github Version...")
@@ -278,21 +335,6 @@ def find_hcf(numbers):
     # return unit
 
 
-def pi_bbp():
-    count = 0
-    pi = Decimal(0)
-    k = 0
-    while count < accuracy:
-        term = (Decimal(1)/(16**k)) * (
-            Decimal(4)/(8*k + 1) - Decimal(2)/(8*k + 4) - Decimal(1)/(8*k + 5) - Decimal(1)/(8*k + 6))
-        if term == 0:
-            break
-        pi += term
-        k += 1
-        print(pi, end='\r')
-        count +=1
-    os.system("cls")
-    return f"{pi}"
 
 def definevars():
     print("\nEnter Variables, Press Enter to Skip")
@@ -330,7 +372,7 @@ def simplify_fraction(numerator, denominator):
 os.system("cls")
 if check_for_updates == 'yes':
     print("Checking for Updates...")
-    checkgithub()
+    checkgithub(versionnumber)
 elif check_for_updates == 'no':
     print("Not Checking for Updates.")
 else:
@@ -512,7 +554,12 @@ while True:
             print("23 = y=mx+c Given Graph")
             print("24 = y=mx+c Given 2 Points")
             print("25 = x, y Points for y=mx+c Graph")
-            convopt = input("What Option Would You Like [1-24]: ")
+            print("26 = Desmos")
+            print("27 = Plot Linear Equation")
+            print("28 = Roman Numeral Converter")
+            print("29 = Radius to Degrees")
+            print("30 = Degrees to Radius")
+            convopt = input("What Option Would You Like [1-28]: ")
             print()
 
             if convopt == "1":
@@ -753,6 +800,7 @@ while True:
                 print("10 = Circumfrance to Diameter")
                 print("11 = Radius to Circumfrance")
                 print("12 = Circumfrance to Radius")
+                print("13 = Sector of Circle")
                 corc = input("What Option Would You Like? [1-12]: ")
                 print()
                 if corc == "1":
@@ -803,6 +851,13 @@ while True:
                     c = input("Circumfrence (No Units)- ")
                     r = float(c)/3.14159265358979/2
                     print(f'The Radius of a Circle with Circumfrence {c} is {r}')
+                if corc == "13":
+                    degrees = float(input("Degrees of Circle Left (No Units)- "))
+                    radius = float(input("Radius (No Units)- "))
+                    area = math.pi * radius * radius * (degrees/360)
+                    print(f"The Sector of a Circle with Radius {radius} and Degrees {degrees} is {area}")
+                goback()
+                continue
             if convopt == "18":
                 lcmnumbers = input("Enter Numbers to Find the Lowest Common Multiple of (Separated by Commas): ")
                 print(f"The LCM of These Numbers is: {find_lcm(lcmnumbers)}")
@@ -875,6 +930,7 @@ while True:
                 gradient = change / perx
                 intercept = float(input("Y Intercept- "))
                 print(f"Calculation: y={gradient}x+{intercept}")
+                plot_linear_equation(f"y={gradient}x+{intercept}")
                 goback()
                 continue
 
@@ -886,6 +942,7 @@ while True:
                 slope = (y2-y1) / (x2-x1)
                 constant = y1 - (slope * x1)
                 print(f"The y=mx+c Formula for the 2 Points ({x1}, {y1}) and ({x2}, {y2}) is y = {slope}x + {constant}")
+                plot_linear_equation(f"y={slope}x+{constant}")
                 goback()
                 continue
 
@@ -906,6 +963,66 @@ while True:
                 except ValueError as e:
                     print(f"Error: {e}")
 
+                goback()
+                continue
+            
+            if convopt == "26":
+                print("1 = Graphing")
+                print("2 = Scientific")
+                print("3 = Four Function")
+                print("4 = Matrix")
+                print("5 = Geometry")
+                print("6 = 3D")
+                desmosopt = input("Which Option Would You Like? [1-6]- ")
+                if desmosopt == "1":
+                    webbrowser.open("https://www.desmos.com/calculator")
+                if desmosopt == "2":
+                    webbrowser.open("https://www.desmos.com/scientific")
+                if desmosopt == "3":
+                    webbrowser.open("https://www.desmos.com/fourfunction")
+                if desmosopt == "4":
+                    webbrowser.open("https://www.desmos.com/matrix")
+                if desmosopt == "5":
+                    webbrowser.open("https://www.desmos.com/geometry")
+                if desmosopt == "6":
+                    webbrowser.open("https://www.desmos.com/3d")
+                goback()
+                continue
+            
+            if convopt == "27":
+                equation = input("Enter A Linear Equation (eg., y = 3x + 2): ")
+
+                plot_linear_equation(f"{equation}")
+
+                goback()
+                continue
+
+            if convopt == "28":
+                print("1 = To Roman")
+                print("2 = From Roman")
+                romanopt = input("Which Option Would You Like? [1, 2]: ")
+                if romanopt == "1":
+                    n = input("Number: ")
+                    r = roman.toRoman(int(n))
+                    print(f"{n} in Roman Numerals is {r}")
+                if romanopt == "2":
+                    r = input("Roman Numeral: ")
+                    n = roman.fromRoman(r)
+                    print(f"{r} in Standard Numerals is {n}")
+                goback()
+                continue
+
+            if convopt == "29":
+                degrees = float(input("Degrees (No Units): "))
+                radius = degrees * math.pi / 180
+                print(f"{degrees} Degrees is {radius} Radius")
+                goback()
+                continue
+
+            if convopt == "30":
+                radius = float(input("Radius (No Units): "))
+                degrees = radius * 180 / math.pi
+                print(f"{radius} Radius is {degrees} Degrees")
                 goback()
                 continue
 
@@ -1440,34 +1557,59 @@ while True:
             continue
 
         if sum.lower() == "pi":
-            decimals = int(input("How Many Decimals Would You Like in Your Number? [1-x]: "))
-            accuracy = input("How Accurate Would You Like Your Number? [1-x] (x for Infinity): ")
-            getcontext().prec = decimals
-            if accuracy.isnumeric():
+            while True:
+                # List available methods to the user.
+                methods = pi.available_methods()
+                # Display numbered methods.
+                print("Available Methods:")
+                for i, method in enumerate(methods, start=1):
+                    print(f" {i}. {method.title()}")
+                
+                # Ask the user to choose a method by number.
                 try:
-                    accuracy = int(accuracy)
-                    pi = pi_bbp()
-                    print(f"Pi: {pi}, Accuracy: {accuracy}")
-                except KeyboardInterrupt:
-                    print(f"Final: {pi}, Accuracy: {accuracy}")
-            else:
-                print("Invalid input or non-numeric value.")
-                count = 0
-                pi = Decimal(0)
-                k = 0
+                    choice = int(input("Enter The Number Corresponding To The Method You'd Like To Use: "))
+                except ValueError:
+                    print("Invalid Input For Method Selection.")
+                    break
+                
+                if not (1 <= choice <= len(methods)):
+                    print("Choice Out Of Range. Please Run The Program Again And Select A Valid Number.")
+                    break
+                
+                chosen_method = methods[choice - 1]
+    
+
+
+                # Ask the user for the desired number of significant digits.
                 try:
-                    while True:
-                        term = (Decimal(1)/(16**k)) * (
-                            Decimal(4)/(8*k + 1) - Decimal(2)/(8*k + 4) - Decimal(1)/(8*k + 5) - Decimal(1)/(8*k + 6))
-                        if term == 0:
-                            break
-                        pi += term
-                        k += 1
-                        print(f"Pi: {pi}, Accuracy: {count}", end='\r')
-                        count +=1
-                except KeyboardInterrupt:
-                    os.system("cls")
-                    print(f"Final: {pi}, Accuracy: {accuracy}")
+                    digits = int(input("Enter The Number Of Significant Digits You Want: "))
+                except ValueError:
+                    print("Invalid Input For Digits.")
+                    break
+
+                # Ask the user for the accuracy (number of terms/iterations).
+                try:
+                    accuracy = int(input("Enter The Number Of Terms/Iterations (Accuracy) You Want: "))
+                except ValueError:
+                    print("Invalid Input For Accuracy.")
+                    break
+                    
+
+                # Prepare keyword arguments depending on the chosen method.
+                kwargs = {"digits": digits}
+                if chosen_method == "gauss_legendre":
+                    kwargs["n_iterations"] = accuracy
+                else:
+                    kwargs["n_terms"] = accuracy
+
+                # Compute π using the selected method.
+                try:
+                    pi_value = pi.compute_pi(method=chosen_method, **kwargs)
+                    print("\nCalculated Value Of π Using " + chosen_method.title() + " Method:")
+                    print(pi_value)
+                    break
+                except Exception as e:
+                    print("An Error Occurred While Computing π: " + str(e))
             goback()
             continue
 
@@ -1509,6 +1651,8 @@ while True:
             help()
             goback()
             continue
+
+
 
         if "!" in sum:
             sum = sum[:-1]
@@ -1564,7 +1708,7 @@ while True:
         if sum.lower() == "c" or sum.lower() == "currency":
             url = f'https://api.currencyapi.com/v3/latest?apikey={currency_api_key}'
 
-            response = requests.get(url, verify=False)
+            response = requests.get(url)
             data = response.json()
 
             rates = data['data']
@@ -1575,8 +1719,8 @@ while True:
                 return amount * rates[to_currency]['value']
 
 
-            amount = float(input("Enter Amount: $"))
-            #amount = amount.replace("$", "")
+            amount = float(input("Enter Amount: "))
+            amount = amount.replace("$", "")
             from_currency = input("From Currency (e.g., USD): ").upper()
             to_currency = input("To Currency (e.g., EUR): ").upper()
 
@@ -1584,6 +1728,132 @@ while True:
             print(f"{amount} {from_currency} = {converted_amount:.2f} {to_currency}")
             goback()
             continue
+
+
+
+
+        if sum.lower() == "p" or sum.lower() == "pythagoras":
+            pythagorasopt = input("1 = Hypotenuse\n2 = Shorter Side\nWhich Side Would You Like to Calculate? [1,2]- ")
+            if pythagorasopt == "1":
+                side1 = float(input("Length of First Side (No Units)- "))
+                side2 = float(input("Length of Second Side (No Units)- "))
+                answer = math.sqrt((side1**2) + (side2**2))
+                print(f"The Hypotenuse of a Triangle with Sides of {side1} and {side2} is {answer}")
+            if pythagorasopt == "2":
+                hypotenuse = float(input("Length of Hypotenuse (No Units)- "))
+                side2 = float(input("Length of Second Side (No Units)- "))
+                answer = math.sqrt((hypotenuse**2) - (side2**2))
+                print(f"The Length of the Third Side of a Triangle with a Hypotenuse of {hypotenuse} and a Second Side Length of {side2} is {answer}")
+            goback()
+            continue
+
+        if sum.lower() == "t" or sum.lower() == "tan":
+            print("1 = Radius")
+            print("2 = Degrees")
+            tanopt = input("Which Option Would You Like?- ")
+            if tanopt == "1":
+                radius = float(input("Radius (No Units): "))
+                answer = math.tan(radius)
+                print(f"The Tan Value of {radius} Radius is {answer}")
+            if tanopt == "2":
+                degrees = float(input("Degrees (No Units): "))
+                radius = degrees * math.pi / 180
+                answer = math.tan(radius)
+                print(f"The Tan Value of {degrees} Degrees is {answer}")
+            goback()
+            continue
+
+        if sum.lower() == "a" or sum.lower() == "area":
+            print("1 = Rhombus")
+            print("2 = Kite")
+            print("3 = Trapezium")
+            print("4 = Parallelogram")
+            print("5 = Square")
+            print("6 = Rectangle")
+            print("7 = Triangle")
+            areaopt = input("Which Option Would You Like?- ")
+            if areaopt == "1":
+                p = float(input("Diagonal 1 (No Units): "))
+                q = float(input("Diagonal 2 (No Units): "))
+                area = (p*q)/2
+                print(f"The Area of a Rhombus with Diagonal 1 {p} and Diagonal 2 {q} is {area}")
+            if areaopt == "2":
+                p = float(input("Diagonal 1 (No Units): "))
+                q = float(input("Diagonal 2 (No Units): "))
+                area = (p*q)/2
+                print(f"The Area of a Kite with Diagonal 1 {p} and Diagonal 2 {q} is {area}")
+            if areaopt == "3":
+                sidea = float(input("Side A (No Units): "))
+                sideb = float(input("Side B (No Units): "))
+                pheight = float(input("Perpendicular Height (No Units): "))
+                area = 0.5 * (sidea+sideb) * pheight
+                print(f"The Area of a Trapezium with Side A {sidea}, Side B {sideb} and Height {pheight} is {area}")
+            if areaopt == "4":
+                base = float(input("Base (No Units): "))
+                pheight = float(input("Perpendicular Height (No Units): "))
+                area = base * pheight
+                print(f"The Area of a Parallelogram with Base {base} and Height {pheight} is {area}")
+            if areaopt == "5":
+                sidelength = float(input("Side Length (No Units): "))
+                area = sidelength * sidelength
+                print(f"The Area of a Square with Sidelength {sidelength} is {area}")
+            if areaopt == "6":
+                sidea = float(input("Side A (No Units): "))
+                sideb = float(input("Side B (No Units): "))
+                area = sidea * sideb
+                print(f"The Area of a Rectangle with Side A {sidea}, Side B {sideb} is {area}")
+            if areaopt == "7":
+                base = float(input("Base (No Units): "))
+                pheight = float(input("Perpendicular Height (No Units): "))
+                area = 0.5 * base * pheight
+                print(f"The Area of a Triangle with Base {base} and Height {pheight} is {area}")
+
+
+
+
+        if sum.lower() == "ft" or sum.lower() == "factortree":
+
+            ftn = int(input("Number: "))
+            leaves = []
+            factor_tree(ftn)
+            leaves = sorted(set(leaves))
+            print(f"\nFactors: {', '.join(map(str, leaves))}")
+            print(f"Number of Factors: {len(leaves)}")
+
+
+        if sum.lower() == "s":
+
+            equations_str = input("Enter Equations to Solve (Comma-Separated): ")
+            equations_str = equations_str.replace("=", "==")
+            equations_str = re.sub(r'(?<!\*)\b(\d+)([a-zA-Z])', r'\1*\2', equations_str)
+            equations_str = equations_str.replace("^", "**")
+
+            equation_list = equations_str.split(",")
+            variables = sorted(set(re.findall(r'\b[a-zA-Z]+\b', equations_str)))
+            symbols_dict = {var: symbols(var) for var in variables}
+
+            equations = []
+            try:
+                for eq in equation_list:
+                    lhs, rhs = eq.strip().split("==")
+                    equations.append(Eq(eval(lhs, {**symbols_dict}), eval(rhs, {**symbols_dict})))
+                
+                solutions = solve(equations, list(symbols_dict.values()))
+                print("Solutions:")
+                
+                if isinstance(solutions, dict):
+                    for var, sol in solutions.items():
+                        print(f"{var} = {sol}")
+                elif isinstance(solutions, list):
+                    for sol in solutions:
+                        print(sol)
+                else:
+                    print(solutions)
+            except Exception as e:
+                print("Invalid Equation Format. Please Try Again.")
+            
+        goback()
+        continue
 
         if sum.endswith("/0"):
             input("Are You Sure You Want to Do This? Press Enter to Continue...")
@@ -1618,26 +1888,26 @@ while True:
             goback()
             continue
 
-        else:
+        
+        try:
+            sum = sum.lower()
+            sum = sum.replace("m", "000000")
+            sum = sum.replace("b", "000000000")
+            sum = sum.replace("t", "000000000000")
+            sum = re.sub(r"(\d+)\(", r"\1*(", sum)
+            
             try:
-                sum = sum.lower()
-                sum = sum.replace("m", "000000")
-                sum = sum.replace("b", "000000000")
-                sum = sum.replace("t", "000000000000")
-                sum = re.sub(r"(\d+)\(", r"\1*(", sum)
-                
-                try:
-                    result = eval(sum)
-                    print(f"The Answer to {sum} is {result}")
-                except Exception as e:
-                    print("Error")
-                    goback()
-                    continue
-
-            except:
+                result = eval(sum)
+                print(f"The Answer to {sum} is {result}")
+            except Exception as e:
                 print("Error")
                 goback()
                 continue
+
+        except:
+            print("Error")
+            goback()
+            continue
             goback()
             continue
     except KeyboardInterrupt:
@@ -1647,5 +1917,6 @@ while True:
     except:
         print("Error")
         goback()
+        
         continue
         goback()
