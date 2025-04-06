@@ -23,7 +23,7 @@ import pi #type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = round(Decimal(3.20), 2)
+versionnumber = round(Decimal(3.60), 2)
 
 dotenv_path = '.env'
 load_dotenv(dotenv_path)
@@ -78,6 +78,7 @@ def help():
     print("A for Area of Polygons")
     print("FT for Factor Tree")
     print("S for Solver")
+    print("TV for Terminal Velocity")
 
 
 
@@ -1852,8 +1853,28 @@ while True:
             except Exception as e:
                 print("Invalid Equation Format. Please Try Again.")
             
+
+        if sum.lower() == "tv":
+            mass = float(input("Mass of Object (kg): "))
+            csa = float(input("Cross-Sectional Area (m²): "))
+            dc = float(input("Drag Coefficient (No Units): "))
+            try:
+                fd = float(input("Fluid Density (kg/m³) (Defaults to 1.225 for Air at Sea Level): "))
+            except:
+                fd = 1.225
+            try:
+                ga = float(input("Gravitational Acceleration (m/s²) (Defaults to 9.81): "))
+            except:
+                ga = 9.81
+                
+            answer = math.sqrt((2*mass*ga)/(fd*csa*dc))
+
+            print(f"The Terminal Velocity of an Object with Mass {mass}, Cross-Sectional Area {csa}, Drag Coefficient {dc}, Fluid Density {fd}, and Gravitational Accaleration {ga} is {answer} m/s")
+                
+            
         goback()
         continue
+
 
         if sum.endswith("/0"):
             input("Are You Sure You Want to Do This? Press Enter to Continue...")
