@@ -23,33 +23,41 @@ import pi #type: ignore
 sys.setrecursionlimit(2147483647)
 os.system("title Caluclator")
 
-versionnumber = round(Decimal(3.60), 2)
+versionnumber = round(Decimal(3.70), 2)
 
 dotenv_path = '.env'
-load_dotenv(dotenv_path)
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
+print("1: Yes")
+print("2: No")
+loaddotenv = input("Would You Like to Load .env [1, 2]: ")
+if loaddotenv == "1":
+    load_dotenv(dotenv_path)
 
-if openai_api_key is None:
-    print("OPENAI_API_KEY not Found in .env. Setting it to 'undefined'.")
-    api_key = "undefined"
-else:
-    print(f"OPENAI_API_KEY is Set.")
-    try:
-        client = OpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
-    except:
-        print("API Key is Not Working")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+
+    if openai_api_key is None:
+        print("OPENAI_API_KEY not Found in .env. Setting it to 'undefined'.")
+        api_key = "undefined"
+    else:
+        print(f"OPENAI_API_KEY is Set.")
+        try:
+            client = OpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        except:
+            print("API Key is Not Working")
 
 
-currency_api_key = os.environ.get("CURRENCY_API_KEY")
+    currency_api_key = os.environ.get("CURRENCY_API_KEY")
 
-check_for_updates = os.getenv('CHECKFORUPDATES')
+    check_for_updates = os.getenv('CHECKFORUPDATES')
 
-if check_for_updates is None:
-    print("CHECKFORUPDATES Not Found in .env. Setting it to 'yes'.")
-    check_for_updates = "yes"
-else:
-    print(f"CHECKFORUPDATES is Set to: {check_for_updates.strip().lower()}")
+    if check_for_updates is None:
+        print("CHECKFORUPDATES Not Found in .env. Setting it to 'no'.")
+        check_for_updates = "no"
+    else:
+        print(f"CHECKFORUPDATES is Set to: {check_for_updates.strip().lower()}")
+
+if loaddotenv == "2":
+    check_for_updates = "no"
 
 
 def help():
@@ -79,6 +87,7 @@ def help():
     print("FT for Factor Tree")
     print("S for Solver")
     print("TV for Terminal Velocity")
+    print("SI for Simple Intrest")
 
 
 
@@ -1872,6 +1881,43 @@ while True:
             print(f"The Terminal Velocity of an Object with Mass {mass}, Cross-Sectional Area {csa}, Drag Coefficient {dc}, Fluid Density {fd}, and Gravitational Accaleration {ga} is {answer} m/s")
                 
             
+
+
+        if sum.lower() == "si":
+            print("1=Simple Intrest (I)")
+            print("2=Principle (P)")
+            print("3=Rate (R)")
+            print("4=Time (T)")
+            siopt = input("Which Would You Like to Find?- ")
+            if siopt == "1":
+                p = float(input("Principle (P)- "))
+                r = float(input("Rate (R)- "))
+                t = float(input("Time (T)- "))
+                si = (p*r*t)/100
+                print(f"The Intrest Gained on Principle {p}, Rate {r}, and Time {t} is {si}")
+
+            if siopt == "2":
+                si = float(input("Simple Intrest (I)- "))
+                r = float(input("Rate (R)- "))
+                t = float(input("Time (T)- "))
+                p = (100*si)/(r*t)
+                print(f"The Principle Investment on Simple Intrest {si}, Rate {r}, and Time {t} is {p}")
+                
+            if siopt == "3":
+                si = float(input("Simple Intrest (I)- "))
+                p = float(input("Principle (P)- "))
+                r = float(input("Rate (R)- "))
+                t = (100*si)/(p*r)
+                print(f"The Investment Rate on Simple Intrest {si}, Principle {p}, and Time {t} is {r}")
+                
+            if siopt == "4":
+                si = float(input("Simple Intrest (I)- "))
+                p = float(input("Principle (P)- "))
+                t = float(input("Time (T)- "))
+                r = (100*si)/(p*t)
+                print(f"The Time Invested on Simple Intrest {si}, Principle {p}, and Rate {r} is {t}")
+
+
         goback()
         continue
 
